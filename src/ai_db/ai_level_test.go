@@ -17,7 +17,7 @@ func TestAiLevel_Get(t *testing.T) {
 }
 
 func TestAiLevel_Put(t *testing.T) {
-	if aiLevel.PutString("name", "maimenggroup") != nil {
+	if aiLevel.PutString("name", "mindata") != nil {
 		t.Error("put failed.")
 	}
 }

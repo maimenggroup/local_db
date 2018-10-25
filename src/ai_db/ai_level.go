@@ -4,13 +4,26 @@ import (
 	"fmt"
 	"github.com/syndtr/goleveldb/leveldb"
 	"sync"
+	"os"
+	"bufio"
+	"io"
+	"bytes"
+	"time"
 )
 
 const (
-	BATCHNUM int = 100
+	BATCHNUM = 100
+)
+
+const (
+	RUNDIR    = "run"
+	BAKDIR    = "bak"
+	UPDATEDIR = "update"
+	TMPDIR    = "tmp"
 )
 
 type AiLevel struct {
+	path string
 	db    *leveldb.DB
 	mutex *sync.RWMutex
 }
@@ -24,13 +37,13 @@ func (e *AiLevelError) Error() string {
 }
 
 func (al *AiLevel) Init(dbpath string) error {
-	db, err := leveldb.OpenFile(dbpath, nil)
+	al.path = dbpath
+	db, err := leveldb.OpenFile(fmt.Sprintf("%s/%s", al.path, RUNDIR), nil)
 	if err != nil {
 		return err
 	}
 	al.db = db
 	al.mutex = &sync.RWMutex{}
-
 	return nil
 }
 
@@ -158,6 +171,65 @@ func (al *AiLevel) DelStringBatch(keys *[]string) error {
 			return err
 		}
 	}
+
+	return nil
+}
+
+func (al *AiLevel) LoadFromFile(file, split string) error {
+	keys, values, err := ReadFile(file, split)
+	if err != nil {
+		return err
+	}
+	return al.PutBatch(keys, values)
+}
+
+
+// 略显冗余，但是减少了加载文件可能带来的时间消耗，减少了写锁的时间
+func (al *AiLevel) ReCreateFromFile(file, split string) error {
+	curTime := time.Now().Format("2006-01-02/15/04")
+	bakDir := fmt.Sprintf("%s/%s/%s", al.path, BAKDIR, curTime)
+	runDir := fmt.Sprintf("%s/%s", al.path, RUNDIR)
+	tmpDir := fmt.Sprintf("%s/%s", al.path, TMPDIR)
+	updDir := fmt.Sprintf("%s/%s", al.path, UPDATEDIR)
+
+	// 先创建备份目录
+	if err := os.MkdirAll(bakDir, 0777); err != nil {
+		return err
+	}
+
+	updDb, err := CreateLevelDb(updDir, file, split)
+	if err != nil {
+		return err
+	}
+	al.mutex.Lock()
+	al.db, updDb = updDb, al.db
+	al.mutex.Unlock()
+	updDb.Close()
+
+	// 创建一个临时的db
+	_, err = CreateLevelDb(tmpDir, file, split)
+	if err != nil {
+		return err
+	}
+
+	// 备份，失败尝试删除目录
+	if err := os.Rename(runDir, bakDir); err != nil {
+		os.Remove(runDir)
+	}
+	// 不管怎样，更新新的数据目录
+	if err := os.Rename(tmpDir, runDir); err != nil {
+		return err
+	}
+
+	db, err := leveldb.OpenFile(runDir, nil)
+	if err != nil {
+		return err
+	}
+
+	al.mutex.Lock()
+	al.db, db = db, al.db
+	al.mutex.Unlock()
+	db.Close()
 
 	return nil
 }
