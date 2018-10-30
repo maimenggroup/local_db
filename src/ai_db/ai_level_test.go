@@ -3,6 +3,7 @@ package ai_db
 import (
 	"fmt"
 	"testing"
+	"strconv"
 )
 
 var aiLevel *AiLevel
@@ -44,6 +45,39 @@ func TestAiLevel_DelBatch(t *testing.T) {
 	if aiLevel.DelStringBatch(&[]string{"name", "mail"}) != nil {
 		t.Error("del batch failed.")
 	}
+}
+
+func TestAiLevel_IncrFloat64(t *testing.T) {
+	key := "jim_budget"
+	var val, inc float64
+	val = 2507604.49
+	s1 := strconv.FormatFloat(val, 'f', -1, 64)
+	aiLevel.PutString(key, s1)
+	s2, _ := aiLevel.GetString(key)
+	t.Log(s2)
+	inc = 10000.12
+	aiLevel.IncrFloat64(key, inc)
+	s2, _ = aiLevel.GetString(key)
+	t.Log(s2)
+	val, _ = strconv.ParseFloat(s2, 64)
+	t.Log(fmt.Sprintf("%.2f", val))
+	t.Log("any way the diff occurs, 有误差!!!")
+}
+
+func TestAiLevel_IncrInt64(t *testing.T) {
+	key := "jim_budget"
+	var val, inc int64
+	val = 2507604
+	s1 := strconv.FormatInt(val, 10)
+	aiLevel.PutString(key, s1)
+	s2, _ := aiLevel.GetString(key)
+	t.Log(s2)
+	inc = 10000
+	aiLevel.IncrInt64(key, inc)
+	s2, _ = aiLevel.GetString(key)
+	t.Log(s2)
+	val, _ = strconv.ParseInt(s2, 10, 64)
+	t.Log(fmt.Sprintf("%d", val))
 }
 
 func TestAiLevel_Scan(t *testing.T) {

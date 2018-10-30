@@ -5,10 +5,8 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"sync"
 	"os"
-	"bufio"
-	"io"
-	"bytes"
 	"time"
+	"strconv"
 )
 
 const (
@@ -129,6 +127,84 @@ func (al *AiLevel) PutString(key string, val string) error {
 	defer al.mutex.Unlock()
 	return al.db.Put([]byte(key), []byte(val), nil)
 }
+
+func (al *AiLevel) GetFloat64(key string) (float64, error) {
+	al.mutex.RLock()
+	defer al.mutex.RUnlock()
+	val, err := al.db.Get([]byte(key), nil)
+	if err != nil {
+		return 0.0, err
+	}
+	valF, err := strconv.ParseFloat(string(val), 64)
+	if err != nil {
+		return 0.0, err
+	}
+	return valF, err
+}
+
+func (al *AiLevel) PutFloat64(key string, val float64) error {
+	al.mutex.Lock()
+	defer al.mutex.Unlock()
+	valS := strconv.FormatFloat(val, 'f', -1, 64)
+	return al.db.Put([]byte(key), []byte(valS), nil)
+}
+
+func (al *AiLevel) IncrFloat64(key string, inc float64) error {
+	al.mutex.Lock()
+	defer al.mutex.Unlock()
+	val, err := al.db.Get([]byte(key), nil)
+	if err != nil {
+		return err
+	}
+	valF, err := strconv.ParseFloat(string(val), 64)
+	if err != nil {
+		return err
+	}
+	sum := valF + inc
+	fmt.Println(sum)
+	valS := strconv.FormatFloat(sum, 'f', -1, 64)
+	fmt.Println(valS)
+	return al.db.Put([]byte(key), []byte(valS), nil)
+}
+
+
+func (al *AiLevel) GetInt64(key string) (int64, error) {
+	al.mutex.RLock()
+	defer al.mutex.RUnlock()
+	val, err := al.db.Get([]byte(key), nil)
+	if err != nil {
+		return 0, err
+	}
+	valI, err := strconv.ParseInt(string(val), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return valI, err
+}
+
+func (al *AiLevel) PutInt64(key string, val int64) error {
+	al.mutex.Lock()
+	defer al.mutex.Unlock()
+	valS := strconv.FormatInt(val, 10)
+	return al.db.Put([]byte(key), []byte(valS), nil)
+}
+
+func (al *AiLevel) IncrInt64(key string, inc int64) error {
+	al.mutex.Lock()
+	defer al.mutex.Unlock()
+	val, err := al.db.Get([]byte(key), nil)
+	if err != nil {
+		return err
+	}
+	valI, err := strconv.ParseInt(string(val), 10, 64)
+	if err != nil {
+		return err
+	}
+	sum := valI + inc
+	valS := strconv.FormatInt(sum, 10)
+	return al.db.Put([]byte(key), []byte(valS), nil)
+}
+
 
 func (al *AiLevel) DelString(key string) error {
 	al.mutex.Lock()
