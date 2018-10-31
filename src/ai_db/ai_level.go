@@ -154,7 +154,7 @@ func (al *AiLevel) IncrFloat64(key string, inc float64) error {
 	defer al.mutex.Unlock()
 	val, err := al.db.Get([]byte(key), nil)
 	if err != nil {
-		return err
+		val = []byte("0.0")
 	}
 	valF, err := strconv.ParseFloat(string(val), 64)
 	if err != nil {
@@ -194,7 +194,7 @@ func (al *AiLevel) IncrInt64(key string, inc int64) error {
 	defer al.mutex.Unlock()
 	val, err := al.db.Get([]byte(key), nil)
 	if err != nil {
-		return err
+		val = []byte("0")
 	}
 	valI, err := strconv.ParseInt(string(val), 10, 64)
 	if err != nil {

@@ -48,11 +48,11 @@ func TestAiLevel_DelBatch(t *testing.T) {
 }
 
 func TestAiLevel_IncrFloat64(t *testing.T) {
-	key := "jim_budget"
+	key := "jim_budget_2"
 	var val, inc float64
 	val = 2507604.49
-	s1 := strconv.FormatFloat(val, 'f', -1, 64)
-	aiLevel.PutString(key, s1)
+	// s1 := strconv.FormatFloat(val, 'f', -1, 64)
+	// aiLevel.PutString(key, s1)
 	s2, _ := aiLevel.GetString(key)
 	t.Log(s2)
 	inc = 10000.12
@@ -65,11 +65,11 @@ func TestAiLevel_IncrFloat64(t *testing.T) {
 }
 
 func TestAiLevel_IncrInt64(t *testing.T) {
-	key := "jim_budget"
+	key := "jim_budget_1"
 	var val, inc int64
 	val = 2507604
-	s1 := strconv.FormatInt(val, 10)
-	aiLevel.PutString(key, s1)
+	// s1 := strconv.FormatInt(val, 10)
+	// aiLevel.PutString(key, s1)
 	s2, _ := aiLevel.GetString(key)
 	t.Log(s2)
 	inc = 10000
