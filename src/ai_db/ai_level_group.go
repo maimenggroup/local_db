@@ -104,6 +104,13 @@ func (alb *AiLevelGroupDb) PutFloat64(tab string, key string, val float64) error
 	return &AiLevelDbError{message: fmt.Sprintf("table[%s] not exists", tab)}
 }
 
+func (alb *AiLevelGroupDb) IncrFloat64(tab string, key string, val float64) error {
+	if db, ok := alb.dbs[tab]; ok {
+		return db.IncrFloat64(key, val)
+	}
+	return &AiLevelDbError{message: fmt.Sprintf("table[%s] not exists", tab)}
+}
+
 func (alb *AiLevelGroupDb) GetInt64(tab string, key string) (int64, error) {
 	if db, ok := alb.dbs[tab]; ok {
 		return db.GetInt64(key)
@@ -114,6 +121,13 @@ func (alb *AiLevelGroupDb) GetInt64(tab string, key string) (int64, error) {
 func (alb *AiLevelGroupDb) PutInt64(tab string, key string, val int64) error {
 	if db, ok := alb.dbs[tab]; ok {
 		return db.PutInt64(key, val)
+	}
+	return &AiLevelDbError{message: fmt.Sprintf("table[%s] not exists", tab)}
+}
+
+func (alb *AiLevelGroupDb) IncrInt64(tab string, key string, val int64) error {
+	if db, ok := alb.dbs[tab]; ok {
+		return db.IncrInt64(key, val)
 	}
 	return &AiLevelDbError{message: fmt.Sprintf("table[%s] not exists", tab)}
 }
