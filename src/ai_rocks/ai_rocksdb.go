@@ -6,13 +6,12 @@ import (
 )
 
 type AiRocksDbs struct {
-	dbPath string
-	option *gorocksdb.Options
+	dbPath      string
+	option      *gorocksdb.Options
 	writeOption *gorocksdb.WriteOptions
-	readOption *gorocksdb.ReadOptions
-	dbs map[string]*AiRocksTable
+	readOption  *gorocksdb.ReadOptions
+	dbs         map[string]*AiRocksTable
 }
-
 
 type AiRocksDbsError struct {
 	message string
@@ -36,7 +35,7 @@ func (alb *AiRocksDbs) Init(dbpath string, tables []string) error {
 		}
 		var rt *AiRocksTable
 		rt = &AiRocksTable{}
-		if err:= rt.Init(table, alb.dbPath, alb.option, alb.writeOption, alb.readOption);err != nil {
+		if err := rt.Init(table, alb.dbPath, alb.option, alb.writeOption, alb.readOption); err != nil {
 			return err
 		}
 		alb.dbs[table] = rt
@@ -77,7 +76,7 @@ func (alb *AiRocksDbs) Del(tab string, key []byte) error {
 func (alb *AiRocksDbs) GetString(tab string, key string) (string, error) {
 	ropt := gorocksdb.NewDefaultReadOptions()
 	if db, ok := alb.dbs[tab]; ok {
-		val , err := db.Db.GetBytes(ropt, []byte(key))
+		val, err := db.Db.GetBytes(ropt, []byte(key))
 		return string(val), err
 	}
 	return "", &AiRocksDbsError{message: fmt.Sprintf("table[%s] not exists", tab)}

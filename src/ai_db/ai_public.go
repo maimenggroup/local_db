@@ -1,11 +1,11 @@
 package ai_db
 
 import (
-	"os"
 	"bufio"
-	"io"
 	"bytes"
 	"github.com/syndtr/goleveldb/leveldb"
+	"io"
+	"os"
 )
 
 func ReadFile(file, split string) (*[][]byte, *[][]byte, error) {

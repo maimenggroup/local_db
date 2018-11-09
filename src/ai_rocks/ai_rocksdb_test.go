@@ -9,7 +9,7 @@ const (
 	BLACKLISTTABLE = "black_list"
 )
 
-func init(){
+func init() {
 	aiRocksDb = &AiRocksDbs{}
 	aiRocksDb.Init("../../data/rocks_test/", []string{WHITELISTTABLE, BLACKLISTTABLE})
 }

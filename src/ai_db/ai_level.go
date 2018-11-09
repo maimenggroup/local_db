@@ -3,10 +3,10 @@ package ai_db
 import (
 	"fmt"
 	"github.com/syndtr/goleveldb/leveldb"
-	"sync"
 	"os"
-	"time"
 	"strconv"
+	"sync"
+	"time"
 )
 
 const (
@@ -21,7 +21,7 @@ const (
 )
 
 type AiLevel struct {
-	path string
+	path  string
 	db    *leveldb.DB
 	mutex *sync.RWMutex
 }
@@ -167,7 +167,6 @@ func (al *AiLevel) IncrFloat64(key string, inc float64) error {
 	return al.db.Put([]byte(key), []byte(valS), nil)
 }
 
-
 func (al *AiLevel) GetInt64(key string) (int64, error) {
 	al.mutex.RLock()
 	defer al.mutex.RUnlock()
@@ -204,7 +203,6 @@ func (al *AiLevel) IncrInt64(key string, inc int64) error {
 	valS := strconv.FormatInt(sum, 10)
 	return al.db.Put([]byte(key), []byte(valS), nil)
 }
-
 
 func (al *AiLevel) DelString(key string) error {
 	al.mutex.Lock()
@@ -259,11 +257,10 @@ func (al *AiLevel) LoadFromFile(file, split string) error {
 	return al.PutBatch(keys, values)
 }
 
-
 // 略显冗余，但是减少了加载文件可能带来的时间消耗，减少了写锁的时间
 func (al *AiLevel) ReCreateFromFile(file, split string) error {
-	curTime := time.Now().Format("2006-01-02/15/04")
-	bakDir := fmt.Sprintf("%s/%s/%s", al.path, BAKDIR, curTime)
+	curHour := time.Now().Format("2006-01-02/15/")
+	bakDir := fmt.Sprintf("%s/%s/%s", al.path, BAKDIR, curHour)
 	runDir := fmt.Sprintf("%s/%s", al.path, RUNDIR)
 	tmpDir := fmt.Sprintf("%s/%s", al.path, TMPDIR)
 	updDir := fmt.Sprintf("%s/%s", al.path, UPDATEDIR)
@@ -283,14 +280,17 @@ func (al *AiLevel) ReCreateFromFile(file, split string) error {
 	updDb.Close()
 
 	// 创建一个临时的db
-	_, err = CreateLevelDb(tmpDir, file, split)
+	tmpDb, err := CreateLevelDb(tmpDir, file, split)
 	if err != nil {
 		return err
 	}
+	tmpDb.Close()
 
-	// 备份，失败尝试删除目录
-	if err := os.Rename(runDir, bakDir); err != nil {
-		os.Remove(runDir)
+	// 备份，失败尝试删除目录 rename一个不存在的路径
+	curSec := time.Now().Format("0405")
+	if err := os.Rename(runDir, bakDir+curSec); err != nil {
+		// Remove只能删除文件和空目录，要用RemoveAll
+		os.RemoveAll(runDir)
 	}
 	// 不管怎样，更新新的数据目录
 	if err := os.Rename(tmpDir, runDir); err != nil {

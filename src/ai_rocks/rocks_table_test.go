@@ -1,13 +1,13 @@
 package ai_rocks
 
 import (
-	"testing"
 	"github.com/tecbot/gorocksdb"
+	"testing"
 )
 
 var rocksTable *AiRocksTable
 
-const table  = "test_table"
+const table = "test_table"
 
 func init() {
 	rocksTable = &AiRocksTable{}

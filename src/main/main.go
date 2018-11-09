@@ -1,11 +1,11 @@
 package main
 
 import (
+	"ai_rocks"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
-	"ai_rocks"
-	"fmt"
 )
 
 const (

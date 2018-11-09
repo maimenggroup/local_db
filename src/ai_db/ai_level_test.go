@@ -2,8 +2,8 @@ package ai_db
 
 import (
 	"fmt"
-	"testing"
 	"strconv"
+	"testing"
 )
 
 var aiLevel *AiLevel
